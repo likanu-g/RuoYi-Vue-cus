@@ -2,6 +2,7 @@
   <div class="app-container">
     <el-row :gutter="20">
       <!--部门数据-->
+      <!--
       <el-col :span="4" :xs="24">
         <div class="head-container">
           <el-input
@@ -26,7 +27,7 @@
             @node-click="handleNodeClick"
           />
         </div>
-      </el-col>
+      </el-col>-->
       <!--用户数据-->
       <el-col :span="20" :xs="24">
         <el-form :model="queryParams" ref="queryForm" size="small" :inline="true" v-show="showSearch" label-width="68px">

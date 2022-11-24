@@ -1,8 +1,9 @@
 package com.ruoyi.common.utils.uuid;
 
-import java.util.concurrent.atomic.AtomicInteger;
 import com.ruoyi.common.utils.DateUtils;
 import com.ruoyi.common.utils.StringUtils;
+
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author ruoyi 序列生成类

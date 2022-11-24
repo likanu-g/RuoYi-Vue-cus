@@ -1,8 +1,8 @@
 package com.ruoyi.common.core.domain;
 
-import java.util.HashMap;
 import com.ruoyi.common.constant.HttpStatus;
 import com.ruoyi.common.utils.StringUtils;
+import java.util.HashMap;
 
 /**
  * 操作消息提醒
