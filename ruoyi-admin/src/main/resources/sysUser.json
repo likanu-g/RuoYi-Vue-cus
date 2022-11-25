@@ -1,0 +1,56 @@
+[
+  {
+    "admin": true,
+    "avatar": "",
+    "createBy": "admin",
+    "createTime": "2022-11-11 16:17:35",
+    "delFlag": "0",
+    "dept": {
+      "children": [],
+      "deptId": 103,
+      "deptName": "研发部门",
+      "leader": "若依",
+      "params": {}
+    },
+    "deptId": 103,
+    "email": "ry@163.com",
+    "loginDate": "2022-11-18 10:51:51",
+    "loginIp": "127.0.0.1",
+    "nickName": "若依test",
+    "params": {},
+    "phonenumber": "15888888888",
+    "remark": "管理员",
+    "roles": [],
+    "sex": "1",
+    "status": "0",
+    "userId": 1,
+    "userName": "admin"
+  },
+  {
+    "admin": false,
+    "avatar": "",
+    "createBy": "admin",
+    "createTime": "2022-11-11 16:17:35",
+    "delFlag": "0",
+    "dept": {
+      "children": [],
+      "deptId": 105,
+      "deptName": "测试部门",
+      "leader": "若依",
+      "params": {}
+    },
+    "deptId": 105,
+    "email": "ry@qq.com",
+    "loginDate": "2022-11-11 16:17:35",
+    "loginIp": "127.0.0.1",
+    "nickName": "若依test2",
+    "params": {},
+    "phonenumber": "15666666666",
+    "remark": "测试员",
+    "roles": [],
+    "sex": "1",
+    "status": "0",
+    "userId": 2,
+    "userName": "ry"
+  }
+]

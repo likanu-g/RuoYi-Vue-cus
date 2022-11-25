@@ -1,6 +1,7 @@
 package com.ruoyi.system.service.impl;
 
 import com.ruoyi.common.annotation.DataScope;
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.domain.entity.SysRole;
 import com.ruoyi.common.core.domain.entity.SysUser;
@@ -8,6 +9,7 @@ import com.ruoyi.common.exception.ServiceException;
 import com.ruoyi.common.utils.SecurityUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.bean.BeanValidators;
+import com.ruoyi.common.utils.file.JsonFileUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.SysPost;
 import com.ruoyi.system.domain.SysUserPost;
@@ -18,11 +20,13 @@ import com.ruoyi.system.service.ISysUserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import javax.validation.Validator;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -58,6 +62,9 @@ public class SysUserServiceImpl implements ISysUserService
     @Autowired
     protected Validator validator;
 
+    //用户信息json文件路径
+    @Value(value = "${sysUserFilePath}")
+    private File sysUserFilePath;
     /**
      * 根据条件分页查询用户列表
      * 
@@ -66,9 +73,12 @@ public class SysUserServiceImpl implements ISysUserService
      */
     @Override
     @DataScope(deptAlias = "d", userAlias = "u")
-    public List<SysUser> selectUserList(SysUser user)
-    {
-        return userMapper.selectUserList(user);
+    public List<SysUser> selectUserList(SysUser user) {
+        if (!RuoYiConfig.isNoDatabaseEnabled()) {
+            return userMapper.selectUserList(user);
+        } else {
+            return JsonFileUtils.readJson(sysUserFilePath, SysUser.class);
+        }
     }
 
     /**

@@ -32,6 +32,8 @@ public class RuoYiConfig
 
     /** 验证码类型 */
     private static String captchaType;
+    /** 没有数据库，通过配置文件读写数据 */
+    private static boolean noDatabaseEnabled;
 
     public String getName()
     {
@@ -71,6 +73,14 @@ public class RuoYiConfig
     public void setDemoEnabled(boolean demoEnabled)
     {
         this.demoEnabled = demoEnabled;
+    }
+
+    public static boolean isNoDatabaseEnabled() {
+        return noDatabaseEnabled;
+    }
+
+    public void setNoDatabaseEnabled(boolean noDatabaseEnabled) {
+        this.noDatabaseEnabled = noDatabaseEnabled;
     }
 
     public static String getProfile()
