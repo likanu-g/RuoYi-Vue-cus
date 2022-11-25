@@ -14,7 +14,8 @@ ruoyi:
   addressEnabled: false
   # 验证码类型 math 数组计算 char 字符验证
   captchaType: math
-
+  #没有数据库，通过配置文件读写数据
+  noDatabaseEnabled: true
 # 开发环境配置
 server:
   # 服务器的HTTP端口，默认为8080
@@ -70,7 +71,7 @@ spring:
   # redis 配置
   redis:
     # 地址
-    host: localhost
+    host: 121.5.137.230
     # 端口，默认为6379
     port: 6379
     # 数据库索引
