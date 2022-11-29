@@ -1,6 +1,7 @@
 package com.ruoyi.common.utils;
 
 import com.alibaba.fastjson2.JSONArray;
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.domain.entity.SysDictData;
 import com.ruoyi.common.core.redis.RedisCache;
@@ -29,7 +30,7 @@ public class DictUtils
      */
     public static void setDictCache(String key, List<SysDictData> dictDatas)
     {
-        SpringUtils.getBean(RedisCache.class).setCacheObject(getCacheKey(key), dictDatas);
+        CacheUtils.putCache(getCacheKey(key), dictDatas);
     }
 
     /**
@@ -38,13 +39,12 @@ public class DictUtils
      * @param key 参数键
      * @return dictDatas 字典数据列表
      */
-    public static List<SysDictData> getDictCache(String key)
-    {
-        JSONArray arrayCache = SpringUtils.getBean(RedisCache.class).getCacheObject(getCacheKey(key));
-        if (StringUtils.isNotNull(arrayCache))
-        {
+    public static List<SysDictData> getDictCache(String key) {
+        JSONArray arrayCache = CacheUtils.getCache(getCacheKey(key));
+        if (StringUtils.isNotNull(arrayCache)) {
             return arrayCache.toList(SysDictData.class);
         }
+
         return null;
     }
 
@@ -162,7 +162,7 @@ public class DictUtils
      */
     public static void removeDictCache(String key)
     {
-        SpringUtils.getBean(RedisCache.class).deleteObject(getCacheKey(key));
+        CacheUtils.deleteCache(getCacheKey(key));
     }
 
     /**
@@ -170,8 +170,12 @@ public class DictUtils
      */
     public static void clearDictCache()
     {
-        Collection<String> keys = SpringUtils.getBean(RedisCache.class).keys(CacheConstants.SYS_DICT_KEY + "*");
-        SpringUtils.getBean(RedisCache.class).deleteObject(keys);
+        if (!RuoYiConfig.isEhCacheEnabled()) {
+            Collection<String> keys = SpringUtils.getBean(RedisCache.class).keys(CacheConstants.SYS_DICT_KEY + "*");
+            SpringUtils.getBean(RedisCache.class).deleteObject(keys);
+        } else {
+            //TODO ehCache不支持删除通配符*的key
+        }
     }
 
     /**

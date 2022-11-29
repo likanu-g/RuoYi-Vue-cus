@@ -1,13 +1,16 @@
 package com.ruoyi.system.service.impl;
 
 import com.ruoyi.common.annotation.DataSource;
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.constant.UserConstants;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.core.text.Convert;
 import com.ruoyi.common.enums.DataSourceType;
 import com.ruoyi.common.exception.ServiceException;
+import com.ruoyi.common.utils.CacheUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.mapper.SysConfigMapper;
 import com.ruoyi.system.service.ISysConfigService;
@@ -29,8 +32,8 @@ public class SysConfigServiceImpl implements ISysConfigService
     @Autowired
     private SysConfigMapper configMapper;
 
-    @Autowired
-    private RedisCache redisCache;
+  /*  @Autowired
+    private RedisCache redisCache;*/
 
     /**
      * 项目启动时，初始化参数到缓存
@@ -38,7 +41,8 @@ public class SysConfigServiceImpl implements ISysConfigService
     @PostConstruct
     public void init()
     {
-        loadingConfigCache();
+        //TODO 项目启动时，RuoyiConfig还没加载完，先注释掉
+      //  loadingConfigCache();
     }
 
     /**
@@ -65,7 +69,8 @@ public class SysConfigServiceImpl implements ISysConfigService
     @Override
     public String selectConfigByKey(String configKey)
     {
-        String configValue = Convert.toStr(redisCache.getCacheObject(getCacheKey(configKey)));
+        String configStr = CacheUtils.getCache(getCacheKey(configKey));
+        String configValue = Convert.toStr(configStr);
         if (StringUtils.isNotEmpty(configValue))
         {
             return configValue;
@@ -75,7 +80,7 @@ public class SysConfigServiceImpl implements ISysConfigService
         SysConfig retConfig = configMapper.selectConfig(config);
         if (StringUtils.isNotNull(retConfig))
         {
-            redisCache.setCacheObject(getCacheKey(configKey), retConfig.getConfigValue());
+            CacheUtils.putCache(getCacheKey(configKey), retConfig.getConfigValue());
             return retConfig.getConfigValue();
         }
         return StringUtils.EMPTY;
@@ -121,7 +126,7 @@ public class SysConfigServiceImpl implements ISysConfigService
         int row = configMapper.insertConfig(config);
         if (row > 0)
         {
-            redisCache.setCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
+            CacheUtils.putCache(getCacheKey(config.getConfigKey()), config.getConfigValue());
         }
         return row;
     }
@@ -138,7 +143,7 @@ public class SysConfigServiceImpl implements ISysConfigService
         int row = configMapper.updateConfig(config);
         if (row > 0)
         {
-            redisCache.setCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
+            CacheUtils.putCache(getCacheKey(config.getConfigKey()), config.getConfigValue());
         }
         return row;
     }
@@ -159,7 +164,7 @@ public class SysConfigServiceImpl implements ISysConfigService
                 throw new ServiceException(String.format("内置参数【%1$s】不能删除 ", config.getConfigKey()));
             }
             configMapper.deleteConfigById(configId);
-            redisCache.deleteObject(getCacheKey(config.getConfigKey()));
+            CacheUtils.deleteCache(getCacheKey(config.getConfigKey()));
         }
     }
 
@@ -172,7 +177,7 @@ public class SysConfigServiceImpl implements ISysConfigService
         List<SysConfig> configsList = configMapper.selectConfigList(new SysConfig());
         for (SysConfig config : configsList)
         {
-            redisCache.setCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
+            CacheUtils.putCache(getCacheKey(config.getConfigKey()), config.getConfigValue());
         }
     }
 
@@ -182,8 +187,12 @@ public class SysConfigServiceImpl implements ISysConfigService
     @Override
     public void clearConfigCache()
     {
-        Collection<String> keys = redisCache.keys(CacheConstants.SYS_CONFIG_KEY + "*");
-        redisCache.deleteObject(keys);
+        if (!RuoYiConfig.isEhCacheEnabled()) {
+            Collection<String> keys = SpringUtils.getBean(RedisCache.class).keys(CacheConstants.SYS_CONFIG_KEY + "*");
+            SpringUtils.getBean(RedisCache.class).deleteObject(keys);
+        } else {
+            //TODO ehCache不支持通配符*删除缓存
+        }
     }
 
     /**

@@ -1,6 +1,7 @@
 package com.ruoyi.web.controller.monitor;
 
 import com.ruoyi.common.annotation.Log;
+import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.CacheConstants;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
@@ -8,12 +9,15 @@ import com.ruoyi.common.core.domain.model.LoginUser;
 import com.ruoyi.common.core.page.TableDataInfo;
 import com.ruoyi.common.core.redis.RedisCache;
 import com.ruoyi.common.enums.BusinessType;
+import com.ruoyi.common.utils.CacheUtils;
 import com.ruoyi.common.utils.StringUtils;
+import com.ruoyi.common.utils.spring.SpringUtils;
 import com.ruoyi.system.domain.SysUserOnline;
 import com.ruoyi.system.service.ISysUserOnlineService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -31,18 +35,23 @@ public class SysUserOnlineController extends BaseController
     @Autowired
     private ISysUserOnlineService userOnlineService;
 
-    @Autowired
-    private RedisCache redisCache;
+    /*@Autowired
+    private RedisCache redisCache;*/
 
     @PreAuthorize("@ss.hasPermi('monitor:online:list')")
     @GetMapping("/list")
     public TableDataInfo list(String ipaddr, String userName)
     {
-        Collection<String> keys = redisCache.keys(CacheConstants.LOGIN_TOKEN_KEY + "*");
+        Collection<String> keys = null;
+        if (!RuoYiConfig.isEhCacheEnabled()) {
+            keys = SpringUtils.getBean(RedisCache.class).keys(CacheConstants.LOGIN_TOKEN_KEY + "*");
+        } else {
+            //TODO ehCache不支持通配符*删除缓存
+        }
         List<SysUserOnline> userOnlineList = new ArrayList<SysUserOnline>();
         for (String key : keys)
         {
-            LoginUser user = redisCache.getCacheObject(key);
+            LoginUser user = CacheUtils.getCache(key);
             if (StringUtils.isNotEmpty(ipaddr) && StringUtils.isNotEmpty(userName))
             {
                 if (StringUtils.equals(ipaddr, user.getIpaddr()) && StringUtils.equals(userName, user.getUsername()))
@@ -82,7 +91,8 @@ public class SysUserOnlineController extends BaseController
     @DeleteMapping("/{tokenId}")
     public AjaxResult forceLogout(@PathVariable String tokenId)
     {
-        redisCache.deleteObject(CacheConstants.LOGIN_TOKEN_KEY + tokenId);
+        CacheUtils.deleteCache(CacheConstants.LOGIN_TOKEN_KEY + tokenId);
+        
         return success();
     }
 }
