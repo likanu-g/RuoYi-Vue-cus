@@ -39,7 +39,8 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService
     @PostConstruct
     public void init()
     {
-        loadingDictCache();
+        //TODO 项目启动时，RuoyiConfig还没加载完，先注释掉
+        //loadingDictCache();
     }
 
     /**

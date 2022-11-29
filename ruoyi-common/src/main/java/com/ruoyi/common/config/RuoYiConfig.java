@@ -35,6 +35,9 @@ public class RuoYiConfig
     /** 没有数据库，通过配置文件读写数据 */
     private static boolean noDatabaseEnabled;
 
+    //是否开启ehCache缓存
+    private static boolean ehCacheEnabled;
+
     public String getName()
     {
         return name;
@@ -109,6 +112,14 @@ public class RuoYiConfig
 
     public void setCaptchaType(String captchaType) {
         RuoYiConfig.captchaType = captchaType;
+    }
+
+    public static boolean isEhCacheEnabled() {
+        return ehCacheEnabled;
+    }
+
+    public void setEhCacheEnabled(boolean ehCacheEnabled) {
+        this.ehCacheEnabled = ehCacheEnabled;
     }
 
     /**

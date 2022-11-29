@@ -75,6 +75,11 @@ public class Constants
     public static final String TOKEN = "token";
 
     /**
+     * 默认的ehcache名称
+     */
+    public static final String DEFAULT_EHCACHE = "ehCache";
+
+    /**
      * 令牌前缀
      */
     public static final String TOKEN_PREFIX = "Bearer ";
