@@ -30,7 +30,19 @@ public class DictUtils
      */
     public static void setDictCache(String key, List<SysDictData> dictDatas)
     {
-        CacheUtils.putCache(getCacheKey(key), dictDatas);
+        CacheUtils.putCacheObject(getCacheKey(key), dictDatas);
+    }
+
+    /**
+     * 设置字典缓存
+     *
+     * @param key 参数键
+     * @param dictDatas 字典数据列表
+     * @param ehCacheEnabled 是否开启ehCache缓存 
+     */
+    public static void setDictCache(String key, List<SysDictData> dictDatas, boolean ehCacheEnabled)
+    {
+        CacheUtils.putCacheObject(getCacheKey(key), dictDatas, ehCacheEnabled);
     }
 
     /**
@@ -40,9 +52,14 @@ public class DictUtils
      * @return dictDatas 字典数据列表
      */
     public static List<SysDictData> getDictCache(String key) {
-        JSONArray arrayCache = CacheUtils.getCache(getCacheKey(key));
-        if (StringUtils.isNotNull(arrayCache)) {
-            return arrayCache.toList(SysDictData.class);
+        Object cacheData = CacheUtils.getCacheObject(getCacheKey(key));
+        if (!RuoYiConfig.isEhCacheEnabled()) {
+            JSONArray arrayCache = (JSONArray) cacheData;
+            if (StringUtils.isNotNull(arrayCache)) {
+                return arrayCache.toList(SysDictData.class);
+            }
+        } else {
+            return (List<SysDictData>) cacheData;
         }
 
         return null;
@@ -162,7 +179,7 @@ public class DictUtils
      */
     public static void removeDictCache(String key)
     {
-        CacheUtils.deleteCache(getCacheKey(key));
+        CacheUtils.deleteCacheObject(getCacheKey(key));
     }
 
     /**

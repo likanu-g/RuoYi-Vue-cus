@@ -2,6 +2,20 @@
 <ehcache xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:noNamespaceSchemaLocation="http://ehcache.org/ehcache.xsd"
          updateCheck="false">
+    <!--
+       maxElementsInMemory：缓存中允许创建的最大对象数
+       eternal：缓存中对象是否为永久的，如果是，超时设置将被忽略，对象从不过期。
+       timeToIdleSeconds：缓存数据空闲的最大时间，也就是说如果有一个缓存有多久没有被访问就会被销毁， 如果该值是 0 就意味着元素可以停顿无穷长的时间。
+       timeToLiveSeconds：缓存数据存活的时间，缓存对象最大的的存活时间，超过这个时间就会被销毁， 这只能在元素不是永久驻留时有效，如果该值是0就意味着元素可以停顿无穷长的时间。
+       timeToIdleSeconds，timeToLiveSeconds2个参数，一个为0，只看另外一个。2个都不为0，2个条件都要满足！【只看此条】
+       overflowToDisk：配置此属性，当内存中Element数量达到maxElementsInMemory时，Ehcache将会Element写到磁盘中。
+       memoryStoreEvictionPolicy：缓存满了之后的淘汰算法。
+       maxElementsOnDisk 磁盘中最大缓存对象数，若是0表示无穷大
+       diskPersistent是否缓存虚拟机重启期数据
+       diskExpiryThreadIntervalSeconds磁盘失效线程运行时间间隔，默认是120秒
+       diskSpoolBufferSizeMB这个参数设置DiskStore（磁盘缓存）的缓存区大小。默认是30MB。每个Cache都应该有自己的一个缓冲区
+       memoryStoreEvictionPolicy当达到maxElementsInMemory限制时，Ehcache将会根据指定的策略去清理内存。默认策略是LRU（最近最少使用）。你可以设置为FIFO（先进先出）或是LFU（较少使用）
+-->
     <defaultCache
             eternal="false"
             maxElementsInMemory="1000"
@@ -11,13 +25,52 @@
             timeToLiveSeconds="600"
             memoryStoreEvictionPolicy="LRU" />
 
-    <cache
-            name="ehCache"
+    <cache  name="ehCache"
             eternal="false"
             maxElementsInMemory="1000"
             overflowToDisk="false"
             diskPersistent="false"
-            timeToIdleSeconds="0"
-            timeToLiveSeconds="300"
+            timeToIdleSeconds="864000"
+            timeToLiveSeconds="0"
             memoryStoreEvictionPolicy="LRU" />
+
+    <!--验证码缓存 2分钟的有效期-->
+    <cache  name="captchaCache"
+            eternal="false"
+            maxElementsInMemory="1000"
+            overflowToDisk="false"
+            diskPersistent="false"
+            timeToIdleSeconds="120"
+            timeToLiveSeconds="0"
+            memoryStoreEvictionPolicy="LRU" />
+
+    <!--令牌有效期 默认30分钟-->
+    <cache  name="tokenCache"
+            eternal="false"
+            maxElementsInMemory="1000"
+            overflowToDisk="false"
+            diskPersistent="false"
+            timeToIdleSeconds="1800"
+            timeToLiveSeconds="0"
+            memoryStoreEvictionPolicy="LRU" />
+    
+    <!--重复提交缓存 默认有效期5s-->
+    <cache  name="repeatSubmitCache"
+            eternal="false"
+            maxElementsInMemory="1000"
+            overflowToDisk="false"
+            diskPersistent="false"
+            timeToIdleSeconds="5"
+            timeToLiveSeconds="0"
+            memoryStoreEvictionPolicy="LRU" />
+
+    <!--登录账户密码错误次数缓存 默认有效期10分钟-->
+    <cache  name="pwdErrCntCache"
+            eternal="false"
+            maxElementsInMemory="1000"
+            overflowToDisk="false"
+            diskPersistent="false"
+            timeToIdleSeconds="600"
+            timeToLiveSeconds="0"
+            memoryStoreEvictionPolicy="LRU" />   
 </ehcache>

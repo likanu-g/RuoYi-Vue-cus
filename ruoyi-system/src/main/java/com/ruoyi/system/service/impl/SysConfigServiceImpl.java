@@ -15,10 +15,12 @@ import com.ruoyi.system.domain.SysConfig;
 import com.ruoyi.system.mapper.SysConfigMapper;
 import com.ruoyi.system.service.ISysConfigService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.PostConstruct;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -32,8 +34,8 @@ public class SysConfigServiceImpl implements ISysConfigService
     @Autowired
     private SysConfigMapper configMapper;
 
-  /*  @Autowired
-    private RedisCache redisCache;*/
+    @Value("${ruoyi.ehCacheEnabled}")
+    private boolean ehCacheEnabled;
 
     /**
      * 项目启动时，初始化参数到缓存
@@ -41,8 +43,7 @@ public class SysConfigServiceImpl implements ISysConfigService
     @PostConstruct
     public void init()
     {
-        //TODO 项目启动时，RuoyiConfig还没加载完，先注释掉
-      //  loadingConfigCache();
+        loadingConfigCache();
     }
 
     /**
@@ -69,7 +70,7 @@ public class SysConfigServiceImpl implements ISysConfigService
     @Override
     public String selectConfigByKey(String configKey)
     {
-        String configStr = CacheUtils.getCache(getCacheKey(configKey));
+        String configStr = CacheUtils.getCacheObject(getCacheKey(configKey));
         String configValue = Convert.toStr(configStr);
         if (StringUtils.isNotEmpty(configValue))
         {
@@ -80,7 +81,8 @@ public class SysConfigServiceImpl implements ISysConfigService
         SysConfig retConfig = configMapper.selectConfig(config);
         if (StringUtils.isNotNull(retConfig))
         {
-            CacheUtils.putCache(getCacheKey(configKey), retConfig.getConfigValue());
+            CacheUtils.addConfigCacheKey(getCacheKey(configKey));
+            CacheUtils.putCacheObject(getCacheKey(configKey), retConfig.getConfigValue());
             return retConfig.getConfigValue();
         }
         return StringUtils.EMPTY;
@@ -126,7 +128,8 @@ public class SysConfigServiceImpl implements ISysConfigService
         int row = configMapper.insertConfig(config);
         if (row > 0)
         {
-            CacheUtils.putCache(getCacheKey(config.getConfigKey()), config.getConfigValue());
+            CacheUtils.addConfigCacheKey(getCacheKey(config.getConfigKey()));
+            CacheUtils.putCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
         }
         return row;
     }
@@ -143,7 +146,8 @@ public class SysConfigServiceImpl implements ISysConfigService
         int row = configMapper.updateConfig(config);
         if (row > 0)
         {
-            CacheUtils.putCache(getCacheKey(config.getConfigKey()), config.getConfigValue());
+            CacheUtils.addConfigCacheKey(getCacheKey(config.getConfigKey()));
+            CacheUtils.putCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue());
         }
         return row;
     }
@@ -164,7 +168,8 @@ public class SysConfigServiceImpl implements ISysConfigService
                 throw new ServiceException(String.format("内置参数【%1$s】不能删除 ", config.getConfigKey()));
             }
             configMapper.deleteConfigById(configId);
-            CacheUtils.deleteCache(getCacheKey(config.getConfigKey()));
+            CacheUtils.removeConfigCacheKey(getCacheKey(config.getConfigKey()));
+            CacheUtils.deleteCacheObject(getCacheKey(config.getConfigKey()));
         }
     }
 
@@ -177,7 +182,10 @@ public class SysConfigServiceImpl implements ISysConfigService
         List<SysConfig> configsList = configMapper.selectConfigList(new SysConfig());
         for (SysConfig config : configsList)
         {
-            CacheUtils.putCache(getCacheKey(config.getConfigKey()), config.getConfigValue());
+            CacheUtils.addConfigCacheKey(getCacheKey(config.getConfigKey()));
+            //PostConstruct 是在实例化之后，才会执行，而RuoYiConfig这个时候还没有拿配置文件的数据，导致RuoYiConfig.isEhCacheEnabled()取值错误
+            //所以ehCacheEnabled修改为@Value 方式获取
+            CacheUtils.putCacheObject(getCacheKey(config.getConfigKey()), config.getConfigValue(), ehCacheEnabled);
         }
     }
 
@@ -185,13 +193,17 @@ public class SysConfigServiceImpl implements ISysConfigService
      * 清空参数缓存数据
      */
     @Override
-    public void clearConfigCache()
-    {
+    public void clearConfigCache() {
         if (!RuoYiConfig.isEhCacheEnabled()) {
             Collection<String> keys = SpringUtils.getBean(RedisCache.class).keys(CacheConstants.SYS_CONFIG_KEY + "*");
             SpringUtils.getBean(RedisCache.class).deleteObject(keys);
         } else {
-            //TODO ehCache不支持通配符*删除缓存
+            Iterator<String> iterator = CacheUtils.getConfigCacheKeys().iterator();
+            while (iterator.hasNext()) {
+                String key = iterator.next();
+                CacheUtils.deleteCacheObject(key);
+                iterator.remove();
+            }
         }
     }
 

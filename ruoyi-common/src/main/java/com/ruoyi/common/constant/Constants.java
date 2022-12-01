@@ -65,7 +65,7 @@ public class Constants
     public static final String LOGIN_FAIL = "Error";
  
     /**
-     * 验证码有效期（分钟）
+     * 验证码有效期（分钟）（若修改需要更新ehCache.xml的captchaCache过期时间）
      */
     public static final Integer CAPTCHA_EXPIRATION = 2;
 
@@ -78,6 +78,14 @@ public class Constants
      * 默认的ehcache名称
      */
     public static final String DEFAULT_EHCACHE = "ehCache";
+    //验证码缓存 有效期默认2分钟
+    public static final String CAPTCH_EHCACHE = "captchaCache";
+    //令牌缓存 有效期默认30分钟
+    public static final String TOKEN_EHCACHE = "tokenCache";
+    //重复提交缓存 有效期5s
+    public static final String REPEAT_SUBMIT_EHCACHE = "repeatSubmitCache";
+    //登录账户密码错误次数缓存 默认有效期10分钟
+    public static final String PWD_ERR_CNT_EHCACHE = "pwdErrCntCache";
 
     /**
      * 令牌前缀

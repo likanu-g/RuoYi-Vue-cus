@@ -3,6 +3,7 @@ package com.ruoyi.framework.interceptor.impl;
 import com.alibaba.fastjson2.JSON;
 import com.ruoyi.common.annotation.RepeatSubmit;
 import com.ruoyi.common.constant.CacheConstants;
+import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.filter.RepeatedlyRequestWrapper;
 import com.ruoyi.common.utils.CacheUtils;
 import com.ruoyi.common.utils.StringUtils;
@@ -33,9 +34,6 @@ public class SameUrlDataInterceptor extends RepeatSubmitInterceptor
     @Value("${token.header}")
     private String header;
 
-  /*@Autowired
-    private RedisCache redisCache;*/
-
     @SuppressWarnings("unchecked")
     @Override
     public boolean isRepeatSubmit(HttpServletRequest request, RepeatSubmit annotation)
@@ -65,7 +63,7 @@ public class SameUrlDataInterceptor extends RepeatSubmitInterceptor
         // 唯一标识（指定key + url + 消息头）
         String cacheRepeatKey = CacheConstants.REPEAT_SUBMIT_KEY + url + submitKey;
 
-        Object sessionObj = CacheUtils.getCache(cacheRepeatKey);
+        Object sessionObj = CacheUtils.getCacheObject(cacheRepeatKey, Constants.REPEAT_SUBMIT_EHCACHE);
         if (sessionObj != null)
         {
             Map<String, Object> sessionMap = (Map<String, Object>) sessionObj;
@@ -81,7 +79,7 @@ public class SameUrlDataInterceptor extends RepeatSubmitInterceptor
         Map<String, Object> cacheMap = new HashMap<String, Object>();
         cacheMap.put(url, nowDataMap);
 
-        CacheUtils.putCache(cacheRepeatKey, cacheMap, annotation.interval(), TimeUnit.MILLISECONDS);
+        CacheUtils.putCacheObject(cacheRepeatKey, cacheMap, annotation.interval(), TimeUnit.MILLISECONDS, Constants.REPEAT_SUBMIT_EHCACHE);
         return false;
     }
 

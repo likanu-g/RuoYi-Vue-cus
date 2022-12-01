@@ -33,9 +33,6 @@ public class CaptchaController
 
     @Resource(name = "captchaProducerMath")
     private Producer captchaProducerMath;
-
-    /*@Autowired
-    private RedisCache redisCache;*/
     
     @Autowired
     private ISysConfigService configService;
@@ -75,7 +72,7 @@ public class CaptchaController
             image = captchaProducer.createImage(capStr);
         }
 
-        CacheUtils.putCache(verifyKey, code, Constants.CAPTCHA_EXPIRATION, TimeUnit.MINUTES);
+        CacheUtils.putCacheObject(verifyKey, code, Constants.CAPTCHA_EXPIRATION, TimeUnit.MINUTES, Constants.CAPTCH_EHCACHE);
         
         // 转换流信息写出
         FastByteArrayOutputStream os = new FastByteArrayOutputStream();
