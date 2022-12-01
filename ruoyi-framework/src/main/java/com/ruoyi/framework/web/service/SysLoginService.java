@@ -37,9 +37,6 @@ public class SysLoginService
 
     @Resource
     private AuthenticationManager authenticationManager;
-
-/*    @Autowired
-    private RedisCache redisCache;*/
     
     @Autowired
     private ISysUserService userService;
@@ -109,8 +106,8 @@ public class SysLoginService
     {
         String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + StringUtils.nvl(uuid, "");
         
-        String captcha = CacheUtils.getCache(verifyKey);
-        CacheUtils.deleteCache(verifyKey);
+        String captcha = CacheUtils.getCacheObject(verifyKey, Constants.CAPTCH_EHCACHE);
+        CacheUtils.deleteCacheObject(verifyKey);
         if (captcha == null)
         {
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL, MessageUtils.message("user.jcaptcha.expire")));

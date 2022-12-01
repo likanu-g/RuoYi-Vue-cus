@@ -17,8 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -47,11 +46,6 @@ public class TokenService
 
     private static final Long MILLIS_MINUTE_TEN = 20 * 60 * 1000L;
 
-/*
-    @Autowired
-    private RedisCache redisCache;
-*/
-
     /**
      * 获取用户身份信息
      *
@@ -69,7 +63,7 @@ public class TokenService
                 // 解析对应的权限以及用户信息
                 String uuid = (String) claims.get(Constants.LOGIN_USER_KEY);
                 String userKey = getTokenKey(uuid);
-                return CacheUtils.getCache(userKey);
+                return CacheUtils.getCacheObject(userKey, Constants.TOKEN_EHCACHE);
             }
             catch (Exception e)
             {
@@ -97,7 +91,8 @@ public class TokenService
         if (StringUtils.isNotEmpty(token))
         {
             String userKey = getTokenKey(token);
-            CacheUtils.deleteCache(userKey);
+            CacheUtils.removeTokenCacheKey(userKey);
+            CacheUtils.deleteCacheObject(userKey);
         }
     }
 
@@ -146,7 +141,8 @@ public class TokenService
         loginUser.setExpireTime(loginUser.getLoginTime() + expireTime * MILLIS_MINUTE);
         // 根据uuid将loginUser缓存
         String userKey = getTokenKey(loginUser.getToken());
-        CacheUtils.putCache(userKey, loginUser, expireTime, TimeUnit.MINUTES);
+        CacheUtils.addTokenCacheKey(userKey);
+        CacheUtils.putCacheObject(userKey, loginUser, expireTime, TimeUnit.MINUTES, Constants.TOKEN_EHCACHE);
     }
 
     /**

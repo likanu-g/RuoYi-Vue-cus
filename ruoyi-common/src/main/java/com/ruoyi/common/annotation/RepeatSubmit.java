@@ -16,6 +16,7 @@ public @interface RepeatSubmit
 {
     /**
      * 间隔时间(ms)，小于此时间视为重复提交
+     * 若修改需要更新ehCache.xml的repeatSubmitCache过期时间
      */
     public int interval() default 5000;
 

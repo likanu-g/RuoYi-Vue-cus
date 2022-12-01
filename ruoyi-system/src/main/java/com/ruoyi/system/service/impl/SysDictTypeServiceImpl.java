@@ -10,6 +10,7 @@ import com.ruoyi.system.mapper.SysDictDataMapper;
 import com.ruoyi.system.mapper.SysDictTypeMapper;
 import com.ruoyi.system.service.ISysDictTypeService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,14 +34,16 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService
     @Autowired
     private SysDictDataMapper dictDataMapper;
 
+    @Value("${ruoyi.ehCacheEnabled}")
+    private boolean ehCacheEnabled;
+
     /**
      * 项目启动时，初始化字典到缓存
      */
     @PostConstruct
     public void init()
     {
-        //TODO 项目启动时，RuoyiConfig还没加载完，先注释掉
-        //loadingDictCache();
+        loadingDictCache();
     }
 
     /**
@@ -144,7 +147,12 @@ public class SysDictTypeServiceImpl implements ISysDictTypeService
         Map<String, List<SysDictData>> dictDataMap = dictDataMapper.selectDictDataList(dictData).stream().collect(Collectors.groupingBy(SysDictData::getDictType));
         for (Map.Entry<String, List<SysDictData>> entry : dictDataMap.entrySet())
         {
-            DictUtils.setDictCache(entry.getKey(), entry.getValue().stream().sorted(Comparator.comparing(SysDictData::getDictSort)).collect(Collectors.toList()));
+            //PostConstruct 是在实例化之后，才会执行，而RuoYiConfig这个时候还没有拿配置文件的数据，导致RuoYiConfig.isEhCacheEnabled()取值错误
+            //所以ehCacheEnabled修改为@Value 方式获取
+            DictUtils.setDictCache(
+                    entry.getKey(),
+                    entry.getValue().stream().sorted(Comparator.comparing(SysDictData::getDictSort)).collect(Collectors.toList()),
+                    ehCacheEnabled);
         }
     }
 

@@ -3,6 +3,7 @@ package com.ruoyi.web.controller.monitor;
 import com.ruoyi.common.annotation.Log;
 import com.ruoyi.common.config.RuoYiConfig;
 import com.ruoyi.common.constant.CacheConstants;
+import com.ruoyi.common.constant.Constants;
 import com.ruoyi.common.core.controller.BaseController;
 import com.ruoyi.common.core.domain.AjaxResult;
 import com.ruoyi.common.core.domain.model.LoginUser;
@@ -12,6 +13,7 @@ import com.ruoyi.common.enums.BusinessType;
 import com.ruoyi.common.utils.CacheUtils;
 import com.ruoyi.common.utils.StringUtils;
 import com.ruoyi.common.utils.spring.SpringUtils;
+import com.ruoyi.framework.web.service.TokenService;
 import com.ruoyi.system.domain.SysUserOnline;
 import com.ruoyi.system.service.ISysUserOnlineService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,8 +37,10 @@ public class SysUserOnlineController extends BaseController
     @Autowired
     private ISysUserOnlineService userOnlineService;
 
-    /*@Autowired
-    private RedisCache redisCache;*/
+    @Autowired
+    private TokenService tokenService;
+
+    private final ThreadLocal<Boolean> saved = new ThreadLocal<>();
 
     @PreAuthorize("@ss.hasPermi('monitor:online:list')")
     @GetMapping("/list")
@@ -46,12 +50,12 @@ public class SysUserOnlineController extends BaseController
         if (!RuoYiConfig.isEhCacheEnabled()) {
             keys = SpringUtils.getBean(RedisCache.class).keys(CacheConstants.LOGIN_TOKEN_KEY + "*");
         } else {
-            //TODO ehCache不支持通配符*删除缓存
+            keys = CacheUtils.getTokenCacheKeys();
         }
         List<SysUserOnline> userOnlineList = new ArrayList<SysUserOnline>();
         for (String key : keys)
         {
-            LoginUser user = CacheUtils.getCache(key);
+            LoginUser user = CacheUtils.getCacheObject(key, Constants.TOKEN_EHCACHE);
             if (StringUtils.isNotEmpty(ipaddr) && StringUtils.isNotEmpty(userName))
             {
                 if (StringUtils.equals(ipaddr, user.getIpaddr()) && StringUtils.equals(userName, user.getUsername()))
@@ -91,8 +95,8 @@ public class SysUserOnlineController extends BaseController
     @DeleteMapping("/{tokenId}")
     public AjaxResult forceLogout(@PathVariable String tokenId)
     {
-        CacheUtils.deleteCache(CacheConstants.LOGIN_TOKEN_KEY + tokenId);
-        
+        CacheUtils.removeTokenCacheKey(CacheConstants.LOGIN_TOKEN_KEY + tokenId);
+        CacheUtils.deleteCacheObject(CacheConstants.LOGIN_TOKEN_KEY + tokenId);
         return success();
     }
 }

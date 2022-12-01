@@ -31,9 +31,6 @@ public class SysRegisterService
 
     @Autowired
     private ISysConfigService configService;
-/*
-    @Autowired
-    private RedisCache redisCache;*/
 
     /**
      * 注册
@@ -101,8 +98,8 @@ public class SysRegisterService
     public void validateCaptcha(String username, String code, String uuid)
     {
         String verifyKey = CacheConstants.CAPTCHA_CODE_KEY + StringUtils.nvl(uuid, "");
-        String captcha = CacheUtils.getCache(verifyKey);
-        CacheUtils.deleteCache(verifyKey);
+        String captcha = CacheUtils.getCacheObject(verifyKey, Constants.CAPTCH_EHCACHE);
+        CacheUtils.deleteCacheObject(verifyKey);
         
         if (captcha == null)
         {

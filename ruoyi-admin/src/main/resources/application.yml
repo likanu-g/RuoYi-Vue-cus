@@ -47,7 +47,7 @@ user:
   password:
     # 密码最大错误次数
     maxRetryCount: 5
-    # 密码锁定时间（默认10分钟）
+    # 密码锁定时间（默认10分钟,若修改需要更新ehCache.xml的pwdErrCntCache过期时间）
     lockTime: 10
 
 # Spring配置
@@ -106,7 +106,7 @@ token:
     header: Authorization
     # 令牌密钥
     secret: abcdefghijklmnopqrstuvwxyz
-    # 令牌有效期（默认30分钟）
+    # 令牌有效期（默认30分钟）若修改需要更新ehCache.xml的tokenCache过期时间
     expireTime: 30
   
 # MyBatis配置

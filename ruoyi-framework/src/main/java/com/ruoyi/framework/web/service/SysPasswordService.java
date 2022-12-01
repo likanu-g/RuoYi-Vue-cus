@@ -25,9 +25,6 @@ import java.util.concurrent.TimeUnit;
 @Component
 public class SysPasswordService
 {
-    /*@Autowired
-    private RedisCache redisCache;*/
-
     @Value(value = "${user.password.maxRetryCount}")
     private int maxRetryCount;
 
@@ -51,7 +48,7 @@ public class SysPasswordService
         String username = usernamePasswordAuthenticationToken.getName();
         String password = usernamePasswordAuthenticationToken.getCredentials().toString();
 
-        Integer retryCount = CacheUtils.getCache(getCacheKey(username));
+        Integer retryCount = CacheUtils.getCacheObject(getCacheKey(username), Constants.PWD_ERR_CNT_EHCACHE);
 
         if (retryCount == null)
         {
@@ -70,7 +67,7 @@ public class SysPasswordService
             retryCount = retryCount + 1;
             AsyncManager.me().execute(AsyncFactory.recordLogininfor(username, Constants.LOGIN_FAIL,
                     MessageUtils.message("user.password.retry.limit.count", retryCount)));
-            CacheUtils.putCache(getCacheKey(username), retryCount, lockTime, TimeUnit.MINUTES);
+            CacheUtils.putCacheObject(getCacheKey(username), retryCount, lockTime, TimeUnit.MINUTES, Constants.PWD_ERR_CNT_EHCACHE);
             throw new UserPasswordNotMatchException();
         }
         else
@@ -86,6 +83,6 @@ public class SysPasswordService
 
     public void clearLoginRecordCache(String loginName)
     {
-        CacheUtils.deleteCache(getCacheKey(loginName));
+        CacheUtils.deleteCacheObject(getCacheKey(loginName));
     }
 }
